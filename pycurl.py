@@ -1,4 +1,5 @@
-# TODO: curl cmd, bash
+# Author: MaxScame
+# https://github.com/MaxScame/pycurl
 
 import json
 from collections import namedtuple
@@ -12,23 +13,22 @@ class CurlParser:
         self.req = curl_req
         self.get_headers()
 
-    def get_headers(self):
-        self.os = self._check_req_os()
-        headers = {}
-        url = ''
-        hdr_lines = []
-        if self.os == 'win':
+    def get_headers(self) -> result:
+        os = self._check_req_os()
+        res = result(url='',headers={})
+        if os == 'win':
             hdr_lines = re.findall('"([^"]*)"', self.req
                                             .replace('^\^"','\'')
                                             .replace('^%^','%'))
-        elif self.os == 'unix':
+        elif os == 'unix':
             hdr_lines = re.findall('\'([^\']*)\'', self.req)
         else:
-            ...
+            print('Unknown OS')
+            return result(url='Empty',headers={})
 
         for line in hdr_lines:
             if line.startswith('http'):
-                url = line
+                res = res._replace(url=line)
                 continue
             pos = line.find(':')
             key, value = line[:pos], line[pos+1:]
@@ -37,9 +37,9 @@ class CurlParser:
                 .replace('^', '') \
                 .strip('\'"') \
                 .replace('\'', '"')
-            headers[key] = value
+            res.headers[key] = value
 
-        return result(url=url, headers=headers)
+        return res
 
     def _check_req_os(self):
         # On Windows, strings are enclosed in double quotes.
@@ -54,12 +54,5 @@ class CurlParser:
             return 'unknown'
 
 
-def prepare_curl(request:str) -> dict:
-    headers = CurlParser(request).get_headers()
-    return headers
-
-def save_data(filename:str) -> None:
-    ...
-
-def load_data(filename:str) -> dict:
-    ...
+def prepare_curl(request:str) -> result:
+    return CurlParser(request).get_headers()
