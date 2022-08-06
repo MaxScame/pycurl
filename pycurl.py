@@ -16,31 +16,30 @@ class CurlParser:
         self.os = self._check_req_os()
         headers = {}
         url = ''
-        res = self.req.replace('\n','').split('-H')
+        hdr_lines = []
         if self.os == 'win':
-            temp = re.findall('"([^"]*)"', self.req
+            hdr_lines = re.findall('"([^"]*)"', self.req
                                             .replace('^\^"','\'')
                                             .replace('^%^','%'))
-            for line in temp:
-                if line.startswith('http'):
-                    url = line
-                    continue
-                pos = line.find(':')
-                key, value = line[:pos], line[pos+1:]
-                value = value \
-                    .strip() \
-                    .replace('^', '') \
-                    .strip('\'"') \
-                    .replace('\'', '"')
-                print('"'+key+'":', '"'+value+'"')
-                headers[key] = value
         elif self.os == 'unix':
-            ...
+            hdr_lines = re.findall('\'([^\']*)\'', self.req)
         else:
             ...
-        # print(*res,sep='<<<\n')
-        res = result(url=url, headers=headers)
-        return res
+
+        for line in hdr_lines:
+            if line.startswith('http'):
+                url = line
+                continue
+            pos = line.find(':')
+            key, value = line[:pos], line[pos+1:]
+            value = value \
+                .strip() \
+                .replace('^', '') \
+                .strip('\'"') \
+                .replace('\'', '"')
+            headers[key] = value
+
+        return result(url=url, headers=headers)
 
     def _check_req_os(self):
         # On Windows, strings are enclosed in double quotes.

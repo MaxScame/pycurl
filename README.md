@@ -1,6 +1,5 @@
 # pycurl
 
-Convert   to headers dict.
 A simple converter that converts a `curl` query into a Python dictionary.
 
 Has no external dependencies.
