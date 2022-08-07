@@ -1,7 +1,6 @@
 # Author: MaxScame
 # https://github.com/MaxScame/pycurl
 
-import json
 from collections import namedtuple
 import re
 
@@ -24,7 +23,7 @@ class CurlParser:
             hdr_lines = re.findall('\'([^\']*)\'', self.req)
         else:
             print('Unknown OS')
-            return result(url='Empty',headers={})
+            return res
 
         for line in hdr_lines:
             if line.startswith('http'):
@@ -35,16 +34,17 @@ class CurlParser:
             value = value \
                 .strip() \
                 .replace('^', '') \
-                .strip('\'"') \
                 .replace('\'', '"')
             res.headers[key] = value
 
         return res
 
     def _check_req_os(self):
-        # On Windows, strings are enclosed in double quotes.
-        # In Unix they are enclosed in single quotes
-        # If the query text is valid the 6th character is the first quote
+        """
+        On Windows, strings are enclosed in double quotes.
+        In Unix they are enclosed in single quotes
+        If the query text is valid the 6th character is the first quote
+        """
 
         if self.req[6] == '"':
             return 'win'
